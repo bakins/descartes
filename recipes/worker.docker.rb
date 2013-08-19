@@ -1,5 +1,25 @@
 include_recipe "apt"
 
+# Have to set these files up before we install package or lxc starts with a bogus bridge
+file "/etc/default/lxc" do
+  owner "root"
+  mode "0444"
+  content <<EOF
+USE_LXC_BRIDGE="false"
+LXC_AUTO="false"
+LXC_SHUTDOWN_TIMEOUT=120
+EOF
+end
+
+package "lxc" do
+  options '-o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"'
+end
+
+service "lxc-net" do
+  provider Chef::Provider::Service::Upstart
+  action [ :stop ]
+end
+
 # should we just assume you have the correct kernel installed in your image
 # as it requires a reboot
 
