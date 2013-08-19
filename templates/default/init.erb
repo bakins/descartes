@@ -1,0 +1,38 @@
+#!/bin/bash
+RUN=1
+trap "echo 'shutting down'; RUN=0" SIGPWR
+
+ip route add default via <%= @gateway %>
+
+<% @env.keys.sort.each do |k| -%>
+export <%= k %>="<%= @env[k] %>"
+<% end -%>
+
+
+run_command() {
+    exec <%= @command %>
+}
+
+run_command &
+subpid=$!
+
+#if we fail first time then abort
+#kill -0 $subpid > /dev/null 2>&1
+#if [ $? -ne 0 ]; then
+#    echo "aborting..."
+#    exit -1
+#end
+
+while [ $RUN -ne 0 ]; do
+    sleep 10
+    kill -0 $subpid > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+	run_command &
+	subpid=$!
+    fi
+done
+
+kill -0 $subpid > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+    kill $subpid
+fi

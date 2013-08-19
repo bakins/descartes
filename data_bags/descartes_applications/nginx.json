@@ -1,0 +1,6 @@
+{
+    "id": "nginx",
+    "artifact_url": "http://www.akins.org/openresty/openresty-1.2.8.6.tar.gz",
+    "port": 80,
+    "command": "/openresty-1.2.8.6/nginx/sbin/nginx -p /etc/nginx/nginx.conf"
+}

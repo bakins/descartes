@@ -1,0 +1,6 @@
+{
+    "Hostname": "nginx-1234",
+    "Image": "ubuntu:12.04",
+    "PortSpecs": [ "5000" ],
+    "Cmd": [ "/bin/sh", "-c", "while true; do echo hello world; sleep 1; done" ]
+}

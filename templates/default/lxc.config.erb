@@ -1,0 +1,70 @@
+# based on docker
+lxc.utsname = <%= @hostname %>
+lxc.network.type = veth
+lxc.network.flags = up
+lxc.network.link = <%= @bridge %>
+lxc.network.name = eth0
+lxc.network.mtu = 1500
+lxc.network.ipv4 = <%= @ipaddress %>/24
+lxc.rootfs = <%= @rootfs %>
+lxc.pts = 1024
+lxc.console = none
+lxc.tty = 1
+
+#lxc.aa_profile = unconfined
+
+# no implicit access to devices
+lxc.cgroup.devices.deny = a
+
+# /dev/null and zero
+lxc.cgroup.devices.allow = c 1:3 rwm
+lxc.cgroup.devices.allow = c 1:5 rwm
+
+# consoles
+lxc.cgroup.devices.allow = c 5:1 rwm
+lxc.cgroup.devices.allow = c 5:0 rwm
+lxc.cgroup.devices.allow = c 4:0 rwm
+lxc.cgroup.devices.allow = c 4:1 rwm
+
+# /dev/urandom,/dev/random
+lxc.cgroup.devices.allow = c 1:9 rwm
+lxc.cgroup.devices.allow = c 1:8 rwm
+
+# /dev/pts/* - pts namespaces are "coming soon"
+lxc.cgroup.devices.allow = c 136:* rwm
+lxc.cgroup.devices.allow = c 5:2 rwm
+
+# tuntap
+lxc.cgroup.devices.allow = c 10:200 rwm
+
+# fuse
+#lxc.cgroup.devices.allow = c 10:229 rwm
+
+# rtc
+#lxc.cgroup.devices.allow = c 254:0 rwm
+# standard mount point
+#  WARNING: procfs is a known attack vector and should probably be disabled
+#           if your userspace allows it. eg. see http://blog.zx2c4.com/749
+lxc.mount.entry = proc <%= @rootfs %>/proc proc nosuid,nodev,noexec 0 0
+#  WARNING: sysfs is a known attack vector and should probably be disabled
+#           if your userspace allows it. eg. see http://bit.ly/T9CkqJ
+lxc.mount.entry = sysfs <%= @rootfs %>/sys sysfs nosuid,nodev,noexec 0 0
+lxc.mount.entry = devpts <%= @rootfs %>/dev/pts devpts newinstance,ptmxmode=0666,nosuid,noexec 0 0
+lxc.mount.entry = shm <%= @rootfs %>/dev/shm tmpfs size=65536k,nosuid,nodev,noexec 0 0
+
+
+lxc.mount.entry = /etc/resolv.conf <%= @rootfs %>/etc/resolv.conf none bind,ro 0 0
+
+# Inject init
+lxc.mount.entry = <%= @init %> <%= @rootfs %>/sbin/init none bind,ro 0 0
+
+# drop linux capabilities (apply mainly to the user root in the container)
+#  (Note: 'lxc.cap.keep' is coming soon and should replace this under the
+#         security principle 'deny all unless explicitly permitted', see
+#         http://sourceforge.net/mailarchive/message.php?msg_id=31054627 )
+lxc.cap.drop = audit_control audit_write mac_admin mac_override mknod setfcap setpcap sys_admin sys_boot sys_module sys_nice sys_pacct sys_rawio sys_resource sys_time sys_tty_config
+
+lxc.cgroup.memory.limit_in_bytes = <%= @memory %>
+lxc.cgroup.memory.soft_limit_in_bytes = <%= @memory %>
+lxc.cgroup.memory.memsw.limit_in_bytes = <%= @memory %>
+lxc.cgroup.cpu.shares = <%= @shares %>

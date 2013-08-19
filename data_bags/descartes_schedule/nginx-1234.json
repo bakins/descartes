@@ -1,0 +1,6 @@
+{
+    "id": "nginx-1234",
+    "node": "precise64",
+    "image": "ubuntu:12.04",
+    "command": [ "/bin/sh", "-c", "while true; do echo hello world; sleep 1; done" ]
+}

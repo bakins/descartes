@@ -1,0 +1,3 @@
+#!/bin/sh
+mkdir -p <%= @options[:log_dir] %>
+exec svlogd -tt <%= @options[:log_dir] %>
