@@ -7,4 +7,5 @@ default[:descartes][:sched_data_bag] = "descartes_schedule"
 # where we deploy apps
 default[:descartes][:app_dir] = "/etc/descartes/apps"
 
-default[:descartes][:network] = "192.168.254.0/24"
+default[:descartes][:log_dir] = "/var/log/descartes"
+

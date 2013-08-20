@@ -1,5 +1,4 @@
 #!/bin/bash
 exec 2>&1
-CONTAINER=$(docker -H tcp://127.0.0.1:4243 -h <%= @options['name]' %> <%= @options['image'] %> "<%= @options['command']" )
-exec docker -H tcp://127.0.0.1:4243 wait
+exec /usr/local/sbin/docker-helper <%= @options[:config] %>
 

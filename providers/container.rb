@@ -1,53 +1,53 @@
-def find(name)
-  Docker::Container.all.each do |c|
-    c = c.json
-    if c['Config']['Hostname'] == name
-      return c
-    end
-  end
-  return nil
-end
-
 action :create do
-
   name = new_resource.instance
 
-  unless find(name)
+  log_dir = ::File.join(node[:descartes][:log_dir], name)
+  directory log_dir do
+    recursive true
+  end
 
-    image = new_resource.image
+  config = ::File.join(node[:descartes][:app_dir], "#{name}.yml")
 
-    # can do via API?
-    #  bash "docker pull #{image}" do
-    #    code "docker -H tcp://localhost:4243 pull #{image}"
+  template config do
+    source "instance.yml.erb"
+    variables(
+              hostname: name,
+              image: new_resource.image,
+              command: new_resource.command,
+              port: new_resource.port,
+              env: new_resource.env
+              )
+    notifies :restart, "runit_service[#{name}]"
+  end
 
-    opts = {
-      Hostname: name,
-      Cmd: new_resource.command,
-      Image: new_resource.image,
-      PortSpecs: [ new_resource.port.to_s ],
-      Env: new_resource.env,
-      AttachStderr: false,
-      AttachStdin: false,
-      AttachStdout: false
-    }
-
-    c = Docker::Container.create(opts)
-    c.start
+  runit_service name do
+    run_template_name "lxc"
+    log_template_name "lxc"
+    options(
+            config: config,
+            log_dir: log_dir
+            )
+    action [ :enable, :start ]
   end
 
 end
 
 action :delete do
+  Chef::Log.info "deleting #{new_resource}"
+
   name = new_resource.instance
-  Docker::Container.all(all: 1).each do |c|
-    if c.hostname == name  or (new_resource.container_id and c.id == new_resource.container_id)
-      if c.running?
-        Chef::Log.info "Stopping: #{c.id} : #{name}"
-        c.stop(t: 30)
-        sleep 5
-      end
-      Chef::Log.info "Deleting: #{c.id} : #{name}"
-      c.delete
-    end
+
+  runit_service name do
+    action [ :stop, :disable ]
   end
+
+  directory ::File.join(node[:runit][:sv_dir], name) do
+    recursive true
+    action :delete
+  end
+
+  file ::File.join(node[:descartes][:app_dir], "#{name}.yml") do
+    action :delete
+  end
+
 end
