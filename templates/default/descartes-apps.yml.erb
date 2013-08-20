@@ -1,9 +1,0 @@
----
-instances:
-<% node.run_state[:descartes_apps].sort_by{|i| i[:id] }.each do |i| -%>
-  - name: <%= i[:name] %>
-    <% if i[:check] -%>
-    check: <%= i[:check] %>
-    <% end -%>
-    id: <%= i[:id] %>
-<% end -%>
