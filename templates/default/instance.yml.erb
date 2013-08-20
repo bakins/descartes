@@ -1,0 +1,12 @@
+---
+hostname: <%= @hostname %>
+image: <%= @image %>
+command:
+<% @command.each do |c| -%>
+  - <%= c %>
+<% end -%>
+port: <%= @port %>
+env:
+<% @env.keys.sort.each do |k| -%>
+  - <%= k %>: <%= @env[k] %>
+<% end -%>
